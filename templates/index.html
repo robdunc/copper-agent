@@ -24,7 +24,7 @@
       --red:         #ff5c5c;
     }
 
-    html { font-size: 16px; }
+    html { font-size: 16px; overflow-x: hidden; }
 
     body {
       background: var(--bg);
@@ -195,6 +195,10 @@
       padding: 1.6rem 1.8rem;
       line-height: 1.75;
       font-size: 0.95rem;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: break-word;
+      min-width: 0;
     }
 
     /* Cursor blink while streaming */
@@ -250,6 +254,24 @@
       border: none;
       border-top: 1px solid var(--border);
       margin: 1.2rem 0;
+    }
+
+    #briefingOutput pre {
+      white-space: pre-wrap;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    #briefingOutput table {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      display: block;
+    }
+
+    #briefingOutput img {
+      max-width: 100%;
+      height: auto;
     }
 
     #briefingOutput blockquote {
