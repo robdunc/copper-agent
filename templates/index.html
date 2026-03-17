@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copper Market Intelligence Agent</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --copper:      #b87333;
+      --copper-dark: #8b5523;
+      --copper-light:#d4956a;
+      --copper-glow: rgba(184,115,51,0.18);
+      --bg:          #0d0d0f;
+      --surface:     #141416;
+      --surface2:    #1c1c1f;
+      --border:      #2a2a2e;
+      --text:        #e8e3dc;
+      --text-muted:  #888;
+      --green:       #3ddc84;
+      --red:         #ff5c5c;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a1008 0%, #0d0d0f 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--copper), var(--copper-dark));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 12px var(--copper-glow);
+    }
+
+    .logo h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      font-size: 0.75rem;
+      color: var(--copper-light);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: block;
+    }
+
+    .header-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    #clock {
+      color: var(--copper-light);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Main layout ──────────────────────────────────────────── */
+    main {
+      flex: 1;
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ── Control bar ──────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #generateBtn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--copper), var(--copper-dark));
+      color: #fff;
+      border: none;
+      padding: 0.65rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, box-shadow 0.2s, transform 0.1s;
+      box-shadow: 0 2px 12px var(--copper-glow);
+    }
+
+    #generateBtn:hover:not(:disabled) {
+      opacity: 0.9;
+      box-shadow: 0 4px 20px rgba(184,115,51,0.35);
+      transform: translateY(-1px);
+    }
+
+    #generateBtn:active:not(:disabled) { transform: translateY(0); }
+
+    #generateBtn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-icon { font-size: 1rem; }
+
+    /* spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #statusText {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Briefing card ────────────────────────────────────────── */
+    #briefingCard {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .card-header {
+      background: linear-gradient(90deg, rgba(184,115,51,0.12), transparent);
+      border-bottom: 1px solid var(--border);
+      padding: 0.9rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--copper-light);
+      font-weight: 600;
+    }
+
+    #briefingTimestamp {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Markdown output ──────────────────────────────────────── */
+    #briefingOutput {
+      padding: 1.6rem 1.8rem;
+      line-height: 1.75;
+      font-size: 0.95rem;
+    }
+
+    /* Cursor blink while streaming */
+    #briefingOutput.streaming::after {
+      content: '▋';
+      color: var(--copper-light);
+      animation: blink 0.8s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Markdown element styling */
+    #briefingOutput h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--copper-light);
+      margin: 1.6rem 0 0.6rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    #briefingOutput h2:first-child { margin-top: 0; }
+
+    #briefingOutput h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 1rem 0 0.4rem;
+    }
+
+    #briefingOutput p { margin-bottom: 0.75rem; }
+
+    #briefingOutput ul, #briefingOutput ol {
+      margin: 0.4rem 0 0.8rem 1.5rem;
+    }
+
+    #briefingOutput li { margin-bottom: 0.3rem; }
+
+    #briefingOutput strong { color: var(--copper-light); font-weight: 600; }
+
+    #briefingOutput em { color: var(--text-muted); }
+
+    #briefingOutput code {
+      background: var(--surface2);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      font-size: 0.875em;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      color: var(--copper-light);
+    }
+
+    #briefingOutput hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.2rem 0;
+    }
+
+    #briefingOutput blockquote {
+      border-left: 3px solid var(--copper);
+      padding-left: 1rem;
+      color: var(--text-muted);
+      margin: 0.8rem 0;
+    }
+
+    /* ── Error state ──────────────────────────────────────────── */
+    .error-box {
+      background: rgba(255,92,92,0.08);
+      border: 1px solid rgba(255,92,92,0.25);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      color: var(--red);
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    /* ── Empty state ──────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state .big-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .empty-state h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+    .empty-state p { font-size: 0.9rem; max-width: 340px; margin: 0 auto; }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--copper-light); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      header { padding: 1rem; }
+      main { padding: 1.25rem 1rem; }
+      #briefingOutput { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🔶</div>
+      <div>
+        <h1>Copper Market Intelligence</h1>
+        <span>AI-Powered Daily Briefing</span>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div id="clock">--:--:--</div>
+      <div id="dateDisplay"></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="controls">
+      <button id="generateBtn" onclick="generateBriefing()">
+        <span class="btn-icon">⚡</span>
+        <span id="btnText">Generate Briefing</span>
+        <span class="spinner" id="spinner"></span>
+      </button>
+      <span id="statusText">Ready</span>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div id="briefingCard">
+      <div class="card-header">
+        <span class="card-title">Daily Market Briefing</span>
+        <span id="briefingTimestamp"></span>
+      </div>
+      <div id="briefingOutput"></div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="big-icon">📊</div>
+      <h2>Copper Market Intelligence Agent</h2>
+      <p>Click <strong>Generate Briefing</strong> to fetch an AI-powered analysis of today's copper market.</p>
+    </div>
+  </main>
+
+  <footer>
+    Powered by <a href="https://www.anthropic.com" target="_blank">Claude (claude-opus-4-6)</a>
+    &nbsp;·&nbsp; Copper Market Intelligence Agent
+  </footer>
+
+  <script>
+    // ── Clock ────────────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent =
+        now.toLocaleTimeString('en-US', { hour12: false });
+      document.getElementById('dateDisplay').textContent =
+        now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ── Marked config ────────────────────────────────────────────
+    marked.setOptions({ breaks: true, gfm: true });
+
+    // ── State ────────────────────────────────────────────────────
+    let isGenerating = false;
+    let rawMarkdown = '';
+
+    function setLoading(loading) {
+      isGenerating = loading;
+      const btn = document.getElementById('generateBtn');
+      const spinner = document.getElementById('spinner');
+      const btnText = document.getElementById('btnText');
+      btn.disabled = loading;
+      spinner.style.display = loading ? 'block' : 'none';
+      btnText.textContent = loading ? 'Generating…' : 'Generate Briefing';
+    }
+
+    function setStatus(msg) {
+      document.getElementById('statusText').textContent = msg;
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('errorBox');
+      box.textContent = '⚠ ' + msg;
+      box.style.display = 'block';
+    }
+
+    function clearError() {
+      const box = document.getElementById('errorBox');
+      box.style.display = 'none';
+      box.textContent = '';
+    }
+
+    function renderMarkdown() {
+      const el = document.getElementById('briefingOutput');
+      el.innerHTML = marked.parse(rawMarkdown);
+    }
+
+    // ── Main generate function ───────────────────────────────────
+    function generateBriefing() {
+      if (isGenerating) return;
+
+      clearError();
+      rawMarkdown = '';
+
+      // Show card, hide empty state
+      document.getElementById('emptyState').style.display = 'none';
+      const card = document.getElementById('briefingCard');
+      card.style.display = 'block';
+
+      const outputEl = document.getElementById('briefingOutput');
+      outputEl.innerHTML = '';
+      outputEl.classList.add('streaming');
+
+      const ts = document.getElementById('briefingTimestamp');
+      ts.textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+      setLoading(true);
+      setStatus('Connecting to Claude…');
+
+      const evtSource = new EventSource('/generate', { withCredentials: false });
+
+      // We use POST via fetch + ReadableStream instead of EventSource (which is GET).
+      // Rebuild as fetch-based SSE:
+      evtSource.close(); // close the GET attempt
+
+      fetch('/generate', { method: 'POST' })
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          setStatus('Receiving analysis…');
+
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          function processChunk(value) {
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // keep incomplete line
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const payload = line.slice(6);
+              if (payload === '[DONE]') {
+                // Final render & cleanup
+                outputEl.classList.remove('streaming');
+                renderMarkdown();
+                setLoading(false);
+                setStatus('Briefing complete');
+                return;
+              }
+              try {
+                const parsed = JSON.parse(payload);
+                if (parsed && typeof parsed === 'object' && parsed.error) {
+                  showError(parsed.error);
+                  outputEl.classList.remove('streaming');
+                  setLoading(false);
+                  setStatus('Error');
+                  return;
+                }
+                if (typeof parsed === 'string') {
+                  rawMarkdown += parsed;
+                  // Live render every ~50 chars to avoid thrashing
+                  if (rawMarkdown.length % 50 < 5) renderMarkdown();
+                }
+              } catch {
+                // non-JSON chunk — ignore
+              }
+            }
+          }
+
+          function pump() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                outputEl.classList.remove('streaming');
+                renderMarkdown();
+                setLoading(false);
+                setStatus('Done');
+                return;
+              }
+              processChunk(value);
+              pump();
+            }).catch(err => {
+              showError('Stream error: ' + err.message);
+              outputEl.classList.remove('streaming');
+              setLoading(false);
+              setStatus('Error');
+            });
+          }
+
+          pump();
+        })
+        .catch(err => {
+          showError('Failed to connect: ' + err.message);
+          setLoading(false);
+          setStatus('Error');
+        });
+    }
+
+    // Allow Enter key to trigger generation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey && !isGenerating) generateBriefing();
+    });
+  </script>
+
+</body>
+</html>
