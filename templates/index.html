@@ -480,6 +480,7 @@
               if (payload === '[DONE]') {
                 // Final render & cleanup
                 outputEl.classList.remove('streaming');
+                rawMarkdown += '\n\n---\n\n**---------END OF DAILY BRIEFING-------------**\n';
                 renderMarkdown();
                 setLoading(false);
                 setStatus('Briefing complete');
@@ -509,6 +510,7 @@
             reader.read().then(({ done, value }) => {
               if (done) {
                 outputEl.classList.remove('streaming');
+                rawMarkdown += '\n\n---\n\n**---------END OF DAILY BRIEFING-------------**\n';
                 renderMarkdown();
                 setLoading(false);
                 setStatus('Done');
