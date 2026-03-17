@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copper Market Intelligence — Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0d0d0f;
+      color: #e8e8e8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      background: #141416;
+      border: 1px solid #2a2a2e;
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 0 40px rgba(184, 115, 51, 0.08);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.8rem;
+      justify-content: center;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #b87333, #8b5523);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #b87333;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+
+    .logo-sub {
+      font-size: 0.7rem;
+      color: #666;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #e8e8e8;
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+      margin-bottom: 1.8rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #999;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      background: #0d0d0f;
+      border: 1px solid #2a2a2e;
+      border-radius: 8px;
+      color: #e8e8e8;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 1.2rem;
+    }
+
+    input[type="password"]:focus {
+      border-color: #b87333;
+      box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.15);
+    }
+
+    input[type="password"]::placeholder {
+      color: #444;
+    }
+
+    .error {
+      background: rgba(255, 92, 92, 0.1);
+      border: 1px solid rgba(255, 92, 92, 0.3);
+      border-radius: 8px;
+      color: #ff5c5c;
+      font-size: 0.82rem;
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #b87333, #8b5523);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s, box-shadow 0.2s;
+    }
+
+    button[type="submit"]:hover {
+      opacity: 0.9;
+      box-shadow: 0 0 16px rgba(184, 115, 51, 0.4);
+    }
+
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.72rem;
+      color: #444;
+      text-align: center;
+    }
+
+    .footer span {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-icon">🔶</div>
+      <div>
+        <div class="logo-text">Copper Intelligence</div>
+        <div class="logo-sub">Market Briefing Agent</div>
+      </div>
+    </div>
+
+    <h1>Secure Access</h1>
+    <p class="subtitle">Enter the password to continue</p>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        placeholder="••••••••"
+        autofocus
+        autocomplete="current-password"
+        required
+      />
+      <button type="submit">Unlock</button>
+    </form>
+  </div>
+
+  <div class="footer">
+    Powered by <span>Claude · Anthropic</span>
+  </div>
+</body>
+</html>

@@ -4,13 +4,25 @@ import json
 import argparse
 from datetime import datetime
 
-from flask import Flask, render_template, Response, stream_with_context
+from functools import wraps
+
+from flask import Flask, render_template, Response, stream_with_context, session, redirect, url_for, request
 import anthropic
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("authenticated"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
 
 SYSTEM_PROMPT = """You are a senior copper market analyst at a top-tier commodities trading firm.
 You provide authoritative, data-driven daily market intelligence briefings to institutional clients.
@@ -71,12 +83,35 @@ def stream_briefing():
 
 # ── Web routes ──────────────────────────────────────────────────────────────
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        password = os.environ.get("APP_PASSWORD")
+        if not password:
+            error = "APP_PASSWORD is not configured on the server."
+        elif request.form.get("password") == password:
+            session["authenticated"] = True
+            return redirect(url_for("index"))
+        else:
+            error = "Incorrect password."
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
 @app.route("/")
+@login_required
 def index():
     return render_template("index.html")
 
 
 @app.route("/generate", methods=["POST"])
+@login_required
 def generate():
     def sse_generator():
         try:
