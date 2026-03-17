@@ -33,6 +33,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     /* ── Header ───────────────────────────────────────────────── */
@@ -366,7 +367,7 @@
         <span class="card-title">Daily Market Briefing</span>
         <span id="briefingTimestamp"></span>
       </div>
-      <div id="briefingOutput"></div>
+      <div id="briefingOutput" style="max-width:100%; overflow-wrap:break-word; word-break:break-word; padding-right:20px; box-sizing:border-box;"></div>
     </div>
 
     <div class="empty-state" id="emptyState">
