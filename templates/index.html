@@ -166,6 +166,10 @@
       border-radius: 12px;
       overflow: hidden;
       display: none;
+      max-width: 100%;
+      width: 100%;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
     }
 
     .card-header {
@@ -199,6 +203,10 @@
       word-wrap: break-word;
       word-break: break-word;
       min-width: 0;
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
     }
 
     /* Cursor blink while streaming */
@@ -320,7 +328,8 @@
     @media (max-width: 600px) {
       header { padding: 1rem; }
       main { padding: 1.25rem 1rem; }
-      #briefingOutput { padding: 1.2rem; }
+      #briefingOutput { padding: 1.2rem 1rem; }
+      #briefingCard { border-radius: 8px; }
     }
   </style>
 </head>
